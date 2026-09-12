@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     env:
-      QT_VERSION: '6.8.3'
+      QT_VERSION: '6.5.3'
       # AppImage 启动器检测到这个变量后会自己解压运行，绕开 FUSE 限制
       APPIMAGE_EXTRACT_AND_RUN: '1'
 
