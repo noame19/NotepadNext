@@ -1,4 +1,4 @@
-name: Build AppImage (Fedora container)
+name: Linux AppImage
 
 on:
   workflow_dispatch:
@@ -8,38 +8,42 @@ on:
   pull_request:
     branches: [master]
 
-# Tell AppImage launchers (linuxdeploy etc.) to extract-and-run, since the
-# container doesn't have a working FUSE for end-users to mount AppImages.
-env:
-  APPIMAGE_EXTRACT_AND_RUN: '1'
-
 jobs:
   build:
-    name: Build on Fedora 42
+    name: Build AppImage (Linux)
     runs-on: ubuntu-24.04
-    container:
-      image: fedora:42
+
+    env:
+      QT_VERSION: '6.8'
+      # AppImage 启动器检测到这个变量后会自己解压运行，绕开 FUSE 限制
+      APPIMAGE_EXTRACT_AND_RUN: '1'
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
 
-      - name: Install build dependencies (Fedora 42)
+      - name: Install Qt ${{ env.QT_VERSION }} SDK
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: linux
+          target: desktop
+          arch: gcc_64
+          modules: 'qt5compat'
+          cache: true
+
+      - name: Install Linux build deps
         run: |
           set -eux
-          dnf -y install --setopt=install_weak_deps=False \
-            cmake ninja-build gcc-c++ \
-            qt6-qtbase-devel qt6-qtwayland-devel qt6-qt5compat-devel \
-            desktop-file-utils \
-            wget file \
-            libxkbcommon-devel libxkbcommon-x11 \
-            cups-devel \
-            git
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxkbcommon-dev libxkbcommon-x11-0 \
+            libxcb-cursor-dev libcups2-dev fuse \
+            file
 
       - name: Show toolchain
         run: |
           set -eux
-          cat /etc/os-release | head -4
           cmake --version | head -1
           ninja --version
           echo "qmake6: $(which qmake6)"
@@ -54,7 +58,7 @@ jobs:
       - name: Build
         run: cmake --build build --parallel
 
-      - name: Build AppImage target
+      - name: Build AppImage
         run: cmake --build build --target appimage --parallel
 
       - name: Inspect AppImage
@@ -69,14 +73,14 @@ jobs:
           set -eux
           mkdir -p dist
           mv build/NotepadNext-*.AppImage \
-            "dist/NotepadNext-master-${GITHUB_SHA::7}-fedora42-x86_64.AppImage"
+            "dist/NotepadNext-${GITHUB_SHA::7}-linux-x86_64.AppImage"
           ls -la dist/
           file dist/*.AppImage
 
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v7
         with:
-          name: NotepadNext-Linux-Fedora42-AppImage
+          name: NotepadNext-Linux-Qt${{ env.QT_VERSION }}-AppImage
           path: dist/*.AppImage
           if-no-files-found: error
 
@@ -91,7 +95,7 @@ jobs:
       - name: Download AppImage artifact
         uses: actions/download-artifact@v8
         with:
-          name: NotepadNext-Linux-Fedora42-AppImage
+          name: NotepadNext-Linux-Qt6.8-AppImage
           path: dist
 
       - name: Upload to GitHub release
