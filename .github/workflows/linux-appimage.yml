@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     env:
-      QT_VERSION: '6.8'
+      QT_VERSION: '6.8.3'
       # AppImage 启动器检测到这个变量后会自己解压运行，绕开 FUSE 限制
       APPIMAGE_EXTRACT_AND_RUN: '1'
 
@@ -95,7 +95,7 @@ jobs:
       - name: Download AppImage artifact
         uses: actions/download-artifact@v8
         with:
-          name: NotepadNext-Linux-Qt6.8-AppImage
+          name: NotepadNext-Linux-Qt6.8.3-AppImage
           path: dist
 
       - name: Upload to GitHub release
