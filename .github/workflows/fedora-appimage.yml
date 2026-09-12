@@ -33,7 +33,7 @@ jobs:
             desktop-file-utils \
             wget file \
             libxkbcommon-devel libxkbcommon-x11 \
-            libxcb-cursor-devel cups-devel \
+            cups-devel \
             git
 
       - name: Show toolchain
