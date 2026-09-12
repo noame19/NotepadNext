@@ -29,7 +29,7 @@ jobs:
           set -eux
           dnf -y install --setopt=install_weak_deps=False \
             cmake ninja-build gcc-c++ \
-            qt6-qtbase-devel qt6-qtwayland-devel \
+            qt6-qtbase-devel qt6-qtwayland-devel qt6-qt5compat-devel \
             desktop-file-utils \
             wget file \
             libxkbcommon-devel libxkbcommon-x11 \
