@@ -9,17 +9,59 @@ local STYLE_DEFAULT = 32
 function UpdateTheme()
     if dark_mode then
         theme = {
-            default_fg = rgb(0xD4D4D4),
-            default_bg = rgb(0x1E1E1E),
-            light_fg   = rgb(0x000000),
-            light_bg   = rgb(0xFFFFFF),
+            -- text-styles：Breeze Dark 配色
+            keyword      = rgb(0xcfcfc2),
+            keyword_bold = true,
+            controlflow  = rgb(0xfdbc4b),
+            controlflow_bold = true,
+            function_    = rgb(0x8e44ad),
+            variable     = rgb(0x27aeae),
+            operator_    = rgb(0x3f8058),
+            builtin      = rgb(0x609ca0),
+            builtin_bold = true,
+            preprocessor = rgb(0x27ae60),
+            datatype     = rgb(0x2980b9),
+            char_        = rgb(0x3daee9),
+            string_      = rgb(0xf44f4f),
+            specialstring= rgb(0xda4453),
+            number       = rgb(0xf67400),
+            constant     = rgb(0x27aeae),
+            constant_bold= true,
+            comment      = rgb(0x7a7c7d),
+            warning      = rgb(0xda4453),
+            error_       = rgb(0xda4453),
+            error_underline = true,
+
+            default_fg   = rgb(0xcfcfc2),
+            default_bg   = rgb(0x232629),
         }
     else
         theme = {
-            default_fg = rgb(0x000000),
-            default_bg = rgb(0xFFFFFF),
-            light_fg   = rgb(0x000000),
-            light_bg   = rgb(0xFFFFFF),
+            -- text-styles：Breeze Light 配色
+            keyword      = rgb(0x1f1c1b),
+            keyword_bold = true,
+            controlflow  = rgb(0x1f1c1b),
+            controlflow_bold = true,
+            function_    = rgb(0x644a9b),
+            variable     = rgb(0x0057ae),
+            operator_    = rgb(0xca60ca),
+            builtin      = rgb(0x644a9b),
+            builtin_bold = true,
+            preprocessor = rgb(0x006e28),
+            datatype     = rgb(0x0057ae),
+            char_        = rgb(0x924c9d),
+            string_      = rgb(0xbf0303),
+            specialstring= rgb(0xff5500),
+            number       = rgb(0xb08000),
+            constant     = rgb(0xaa5500),
+            constant_bold= true,
+            comment      = rgb(0x898887),
+            warning      = rgb(0xbf0303),
+            error_       = rgb(0xbf0303),
+            error_underline = true,
+
+            default_fg   = rgb(0x1f1c1b),
+            default_bg   = rgb(0xffffff),
         }
     end
 end
