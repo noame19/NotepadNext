@@ -68,6 +68,106 @@ end
 
 UpdateTheme()
 
+-- 把 NotepadNext 各语言文件里的样式名按关键词自动归类到 Kate 的 text-style。
+-- 比如样式名 "INSTRUCTION WORD" / "KEYWORD" / "STATEMENT" 都归类到 Keyword。
+-- 匹配不到 fallback 到默认色（normal text）。
+--
+-- 返回值：fg（前景色数字），可选 bold/italic/underline 标志
+function MapStyle(styleName)
+    local name = string.upper(styleName or "")
+    local t = theme
+
+    -- 错误样式优先匹配（最高优先级）
+    if name:find("ERROR") or name:find("ALERT") or name:find("INVALID") then
+        return t.error_, nil, nil, t.error_underline
+    end
+
+    -- 关键字/控制流/语句（加粗）
+    if name:find("KEYWORD") or name:find("INSTRUCTION") or name:find("STATEMENT") or name:find("RESERVED") then
+        return t.keyword, t.keyword_bold, nil, nil
+    end
+    if name:find("CONTROL") or name == "FLOW" or name:find("CONTROLFLOW") then
+        return t.controlflow, t.controlflow_bold, nil, nil
+    end
+
+    -- 注释
+    if name:find("COMMENT") or name:find("REM ") then
+        return t.comment, nil, nil, nil
+    end
+
+    -- 字符串和字符
+    if name:find("SPECIAL_STRING") or name:find("SPECIALSTRING") then
+        return t.specialstring, nil, nil, nil
+    end
+    if name:find("CHARACTER") then
+        return t.char_, nil, nil, nil
+    end
+    if name:find("CHAR") and not name:find("CHARACTER") then
+        return t.char_, nil, nil, nil
+    end
+    if name:find("STRING") or name:find("LITERAL") or name:find("VERBATIM") then
+        return t.string_, nil, nil, nil
+    end
+
+    -- 数字
+    if name:find("NUMBER") or name:find("FLOAT") or name:find("DECVAL") or name:find("BASEN") or name:find("INT") or name:find("NUM") then
+        return t.number, nil, nil, nil
+    end
+
+    -- 函数
+    if name:find("FUNCTION") or name:find("METHOD") or name:find("CALL") or name:find("PROC") or name:find("SUBROUTINE") then
+        return t.function_, nil, nil, nil
+    end
+
+    -- 类型/类
+    if name:find("TYPE") or name:find("DATATYPE") or name:find("DATA_TYPE") or name:find("CLASS") then
+        return t.datatype, nil, nil, nil
+    end
+
+    -- 变量/标识符/标量
+    if name:find("VARIABLE") or name:find("IDENTIFIER") or name:find("VAR") or name:find("SCALAR") or name:find("PARAM") or name:find("BACKTICKS") or name:find("REFERENCE") then
+        return t.variable, nil, nil, nil
+    end
+
+    -- 预处理/指令/import
+    if name:find("PREPROCESSOR") or name:find("PREPROC") or name:find("DIRECTIVE") or name:find("IMPORT") or name:find("INCLUDE") then
+        return t.preprocessor, nil, nil, nil
+    end
+
+    -- 内建函数
+    if name:find("BUILTIN") or name:find("BUILT_IN") or name:find("PREDEF") then
+        return t.builtin, t.builtin_bold, nil, nil
+    end
+
+    -- 操作符/标点
+    if name:find("OPERATOR") or name:find("PUNCTUATION") then
+        return t.operator_, nil, nil, nil
+    end
+
+    -- 常量
+    if name:find("CONSTANT") or name:find("CONST") then
+        return t.constant, t.constant_bold, nil, nil
+    end
+
+    -- HTML/XML/标签/属性
+    if name:find("ATTRIBUTE") or name:find("ANNOTATION") or name:find("TAG") or name:find("MARKUP") then
+        return t.preprocessor, nil, nil, nil
+    end
+
+    -- 警告/特殊标记
+    if name:find("WARNING") or name:find("TODO") or name:find("FIXME") or name:find("BUG") then
+        return t.warning, nil, nil, nil
+    end
+
+    -- 文档/头部分隔
+    if name:find("DOCUMENT") or name:find("HEADER") or name:find("TITLE") then
+        return t.specialstring, nil, nil, nil
+    end
+
+    -- 默认（普通文字）
+    return t.default_fg, nil, nil, nil
+end
+
 function DetectLanguageFromContents(contents)
     for name, L in pairs(languages) do
         if L.first_line then
