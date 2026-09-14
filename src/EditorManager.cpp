@@ -322,24 +322,24 @@ void EditorManager::applyEditorTheme(ScintillaNext *editor)
 
     // Fold markers (not affected by styleClearAll)
     for (int i = SC_MARKNUM_FOLDEREND; i <= SC_MARKNUM_FOLDEROPEN; ++i) {
-        editor->markerSetFore(i, dark ? 0x3C3C3C : 0xF3F3F3);
+        editor->markerSetFore(i, dark ? 0x3C3C3C : 0x3a3f44);
         editor->markerSetBack(i, 0x808080);
         editor->markerSetBackSelected(i, dark ? 0xCC7A00 : 0x0000FF);
     }
 
     // Element colors (ARGB 0xAARRGGBB; not affected by styleClearAll)
-    editor->setElementColour(SC_ELEMENT_SELECTION_INACTIVE_BACK, dark ? 0xFF3A3D41 : 0xFFE0E0E0);
-    editor->setElementColour(SC_ELEMENT_CARET_LINE_BACK,         dark ? 0xFF2A2D2E : 0xFFFFE8E8);
-    editor->setElementColour(SC_ELEMENT_WHITE_SPACE,             dark ? 0xFF505050 : 0xFFD0D0D0);
-    editor->setElementColour(SC_ELEMENT_FOLD_LINE,               dark ? 0xFF505050 : 0xFFA0A0A0);
+    editor->setElementColour(SC_ELEMENT_SELECTION_INACTIVE_BACK, dark ? 0xFF414857 : 0xFFFFFE99);
+    editor->setElementColour(SC_ELEMENT_CARET_LINE_BACK,         dark ? 0xFF2A2E32 : 0xFFF8F7F6);
+    editor->setElementColour(SC_ELEMENT_WHITE_SPACE,             dark ? 0xFF505050 : 0xFFD2D2D2);
+    editor->setElementColour(SC_ELEMENT_FOLD_LINE,               dark ? 0xFF224E65 : 0xFF94CAEF);
 
     // Fold margin (not affected by styleClearAll)
-    editor->setFoldMarginColour(true,   dark ? 0x1E1E1E : 0xFFFFFF);
-    editor->setFoldMarginHiColour(true, dark ? 0x252526 : 0xE9E9E9);
+    editor->setFoldMarginColour(true,   dark ? 0x232629 : 0xFFFFFF);
+    editor->setFoldMarginHiColour(true, dark ? 0x31363b : 0xF0F0F0);
 
     // STYLE_DEFAULT sets the base for styleClearAll()
-    editor->styleSetFore(STYLE_DEFAULT, dark ? 0xD4D4D4 : 0x000000);
-    editor->styleSetBack(STYLE_DEFAULT, dark ? 0x1E1E1E : 0xFFFFFF);
+    editor->styleSetFore(STYLE_DEFAULT, dark ? 0xCFCFC2 : 0x1F1C1B);
+    editor->styleSetBack(STYLE_DEFAULT, dark ? 0x232629 : 0xFFFFFF);
     editor->styleClearAll();
 
     // Named styles must be re-applied after any subsequent styleClearAll
