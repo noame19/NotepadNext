@@ -351,18 +351,18 @@ void EditorManager::applyEditorNamedStyles(ScintillaNext *editor)
 {
     const bool dark = settings->effectiveDarkMode();
 
-    editor->styleSetFore(STYLE_LINENUMBER, dark ? 0x858585 : 0x808080);
-    editor->styleSetBack(STYLE_LINENUMBER, dark ? 0x252526 : 0xE4E4E4);
+    editor->styleSetFore(STYLE_LINENUMBER, dark ? 0x7A7C7D : 0xA0A0A0);
+    editor->styleSetBack(STYLE_LINENUMBER, dark ? 0x232629 : 0xFFFFFF);
     editor->styleSetBold(STYLE_LINENUMBER, false);
 
-    editor->styleSetFore(STYLE_BRACELIGHT, dark ? 0xD4D4D4 : 0x0000FF);
-    editor->styleSetBack(STYLE_BRACELIGHT, dark ? 0x1E1E1E : 0xFFFFFF);
+    editor->styleSetFore(STYLE_BRACELIGHT, dark ? 0xCFCFC2 : 0x1F1C1B);
+    editor->styleSetBack(STYLE_BRACELIGHT, dark ? 0x232629 : 0xFFFFFE99);
 
-    editor->styleSetFore(STYLE_BRACEBAD,   dark ? 0x0000FF : 0x000080);
-    editor->styleSetBack(STYLE_BRACEBAD,   dark ? 0x1E1E1E : 0xFFFFFF);
+    editor->styleSetFore(STYLE_BRACEBAD,   dark ? 0xDA4453 : 0xBF0303);
+    editor->styleSetBack(STYLE_BRACEBAD,   dark ? 0x232629 : 0xFFFFFF);
 
-    editor->styleSetFore(STYLE_INDENTGUIDE, dark ? 0x404040 : 0xC0C0C0);
-    editor->styleSetBack(STYLE_INDENTGUIDE, dark ? 0x1E1E1E : 0xFFFFFF);
+    editor->styleSetFore(STYLE_INDENTGUIDE, dark ? 0x3A3F44 : 0xD2D2D2);
+    editor->styleSetBack(STYLE_INDENTGUIDE, dark ? 0x232629 : 0xFFFFFF);
 }
 
 void EditorManager::purgeOldEditorPointers()
