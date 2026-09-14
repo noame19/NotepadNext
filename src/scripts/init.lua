@@ -216,28 +216,37 @@ end
 
 function SetStyle(L)
     -- Apply theme base: STYLE_DEFAULT sets the canvas for styleClearAll().
-    -- This ensures every style slot starts with the correct background color
-    -- even for styles not explicitly listed in the language definition.
+    -- 所有没明确设置 StyleBack 的样式都用 STYLE_DEFAULT 的背景色，保证编辑器背景统一。
     editor.StyleFore[STYLE_DEFAULT] = theme.default_fg
     editor.StyleBack[STYLE_DEFAULT] = theme.default_bg
     editor:StyleClearAll()
 
     if L.styles then
-        for _, style in pairs(L.styles) do
-            -- Translate canonical light-mode colors to theme equivalents.
-            -- Language files that specify black text on white background get
-            -- auto-converted; deliberate syntax colors (blue, green, etc.)
-            -- pass through unchanged since they are readable on dark backgrounds.
-            local fg = (style.fgColor == theme.light_fg) and theme.default_fg or style.fgColor
-            local bg = (style.bgColor == theme.light_bg) and theme.default_bg or style.bgColor
-            editor.StyleFore[style.id] = fg
-            editor.StyleBack[style.id] = bg
+        for name, style in pairs(L.styles) do
+            -- 用 MapStyle 按样式名归类到 Kate text-style，决定前景色和字体属性。
+            -- 不再读原 fgColor/bgColor（背景色全部清掉，让主题统一）。
+            local fg, bold, italic, underline = MapStyle(name)
 
-            if style.fontStyle then
+            editor.StyleFore[style.id] = fg
+            -- 背景色不设置，由 STYLE_DEFAULT 兜底
+
+            -- 字体属性（MapStyle 返回的优先，原 style.fontStyle 作 fallback）
+            if bold then
+                editor.StyleBold[style.id] = true
+            elseif style.fontStyle then
                 editor.StyleBold[style.id] = (style.fontStyle & 1 == 1)
+            end
+
+            if italic then
+                editor.StyleItalic[style.id] = true
+            elseif style.fontStyle then
                 editor.StyleItalic[style.id] = (style.fontStyle & 2 == 2)
+            end
+
+            if underline then
+                editor.StyleUnderline[style.id] = true
+            elseif style.fontStyle then
                 editor.StyleUnderline[style.id] = (style.fontStyle & 4 == 4)
-                editor.StyleEOLFilled[style.id] = (style.fontStyle & 8 == 8)
             end
         end
     end
