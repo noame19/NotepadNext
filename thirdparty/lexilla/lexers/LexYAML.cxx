@@ -118,10 +118,15 @@ void ColouriseYAMLLine(
 	while ((i < lengthLine) && lineBuffer[i] == ' ') { // YAML always uses space, never TABS or anything else
 		i++;
 	}
-	if (lineBuffer[i] == '\t') { // if we skipped all spaces, and we are NOT inside a text block, this is wrong
-		styler.ColourTo(endPos, SCE_YAML_ERROR);
-		return;
-	}
+	// Note: 原本这里有「行首 Tab = SCE_YAML_ERROR」的硬性检查。
+	// 2026-09-15 notepadnext patch: 移除该检查。
+	// 原因：
+	//   1) Lexilla 严格执行 YAML 1.2 规范「缩进必须用空格」，但 Kate KSyntaxHighlighting 行为不同——
+	//      Kate 把 Tab 当 sequence indicator 后的合法字符，PyYAML/ruamel.yaml 等实际工具链
+	//      也只对「混用 tab+空格」报错，纯 Tab 缩进可工作。
+	//   2) 用户在 NotepadNext 用 Tab 缩进 YAML 时整行被标红，体验差。
+	//   3) 删除后 Tab 自然进入后续流程：遇到 # 进注释分支、遇到 : 进 KEY 分支，
+	//      跟普通文本/缩进字符一样处理。真正的语法错误（如未闭合的 | / > 块）仍报 ERROR。
 	if (lineBuffer[i] == '#') {	// Comment
 		styler.SetLineState(currentLine, YAML_STATE_COMMENT);
 		styler.ColourTo(endPos, SCE_YAML_COMMENT);
