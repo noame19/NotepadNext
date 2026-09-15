@@ -328,14 +328,27 @@ void EditorManager::applyEditorTheme(ScintillaNext *editor)
     }
 
     // Element colors (ARGB 0xAARRGGBB; not affected by styleClearAll)
+    // 这些值对照 KDE Breeze Dark/Light 的 editor-colors：
+    //   TextSelection (SC_ELEMENT_SELECTION_BACK) - 选中文字的背景
+    //   CurrentLine (SC_ELEMENT_CARET_LINE_BACK) - 当前光标行背景
+    //   SearchHighlight / ReplaceHighlight - 搜索/替换高亮（额外选择）
+    //   BracketMatching - 配对括号（Kate 用黑色反色，浅色模式用浅黄）
+    //   CodeFolding - 代码折叠线
+    editor->setElementColour(SC_ELEMENT_SELECTION_TEXT,           dark ? 0xFFCFCFC2 : 0xFF1F1C1B);
+    editor->setElementColour(SC_ELEMENT_SELECTION_BACK,           dark ? 0xFF2D5C76 : 0xFF94CAEF);
+    editor->setElementColour(SC_ELEMENT_SELECTION_INACTIVE_TEXT, dark ? 0xFFCFCFC2 : 0xFF1F1C1B);
     editor->setElementColour(SC_ELEMENT_SELECTION_INACTIVE_BACK, dark ? 0xFF414857 : 0xFFFFFE99);
+    editor->setElementColour(SC_ELEMENT_SELECTION_ADDITIONAL_BACK, dark ? 0xFF414857 : 0xFFFFFF00);
+    editor->setElementColour(SC_ELEMENT_SELECTION_ADDITIONAL_TEXT, dark ? 0xFFCFCFC2 : 0xFF805C00);
     editor->setElementColour(SC_ELEMENT_CARET_LINE_BACK,         dark ? 0xFF2A2E32 : 0xFFF8F7F6);
+    editor->setElementColour(SC_ELEMENT_CARET_ADDITIONAL,        dark ? 0xFF1F1C1B : 0xFF000000);
     editor->setElementColour(SC_ELEMENT_WHITE_SPACE,             dark ? 0xFF505050 : 0xFFD2D2D2);
+    editor->setElementColour(SC_ELEMENT_WHITE_SPACE_BACK,        dark ? 0xFF232629 : 0xFFFFFFFF);
     editor->setElementColour(SC_ELEMENT_FOLD_LINE,               dark ? 0xFF224E65 : 0xFF94CAEF);
 
-    // Fold margin (not affected by styleClearAll)
-    editor->setFoldMarginColour(true,   dark ? 0x232629 : 0xFFFFFF);
-    editor->setFoldMarginHiColour(true, dark ? 0x31363b : 0xF0F0F0);
+    // Fold margin (IconBorder + CodeFolding in Kate) - not affected by styleClearAll
+    editor->setFoldMarginColour(true,   dark ? 0x31363b : 0xFFF0F0F0);
+    editor->setFoldMarginHiColour(true, dark ? 0x232629 : 0xFFFFFFFF);
 
     // STYLE_DEFAULT sets the base for styleClearAll()
     editor->styleSetFore(STYLE_DEFAULT, dark ? 0xCFCFC2 : 0x1F1C1B);
@@ -354,12 +367,17 @@ void EditorManager::applyEditorNamedStyles(ScintillaNext *editor)
     editor->styleSetFore(STYLE_LINENUMBER, dark ? 0x7A7C7D : 0xA0A0A0);
     editor->styleSetBack(STYLE_LINENUMBER, dark ? 0x232629 : 0xFFFFFF);
     editor->styleSetBold(STYLE_LINENUMBER, false);
+    // 注：Scintilla 的 STYLE_LINENUMBER 没区分当前行 vs 其它行，
+    // 所以 Kate 的 CurrentLineNumber 字段 (#A5A6A8 / #1E1E1E) 在这里不直接生效。
 
-    editor->styleSetFore(STYLE_BRACELIGHT, dark ? 0xCFCFC2 : 0x1F1C1B);
-    editor->styleSetBack(STYLE_BRACELIGHT, dark ? 0x232629 : 0xFFFFFE99);
+    // BracketMatching：Kate 用 #000000 黑底 + 白字作为反色（任意背景下都醒目）
+    // 浅色模式用浅黄背景（#FFFFFE99）+ 深棕前景（#1F1C1B）
+    editor->styleSetFore(STYLE_BRACELIGHT, dark ? 0xFFCFCFC2 : 0xFF1F1C1B);
+    editor->styleSetBack(STYLE_BRACELIGHT, dark ? 0xFF000000 : 0xFFFFFE99);
+    editor->styleSetBold(STYLE_BRACELIGHT, dark);
 
-    editor->styleSetFore(STYLE_BRACEBAD,   dark ? 0xDA4453 : 0xBF0303);
-    editor->styleSetBack(STYLE_BRACEBAD,   dark ? 0x232629 : 0xFFFFFF);
+    editor->styleSetFore(STYLE_BRACEBAD,   dark ? 0xFFDA4453 : 0xFFBF0303);
+    editor->styleSetBack(STYLE_BRACEBAD,   dark ? 0xFF232629 : 0xFFFFFFFF);
 
     editor->styleSetFore(STYLE_INDENTGUIDE, dark ? 0x3A3F44 : 0xD2D2D2);
     editor->styleSetBack(STYLE_INDENTGUIDE, dark ? 0x232629 : 0xFFFFFF);
