@@ -49,8 +49,13 @@ jobs:
           # 走 wayland input-method-v3 协议，text_input_rect 报告有问题导致
           # fcitx5 候选词 UI 跑到屏幕底部（不贴光标）。
           # 有了这个插件，Qt 走 DBus 协议跟 fcitx5 通信，候选词位置准确。
+          # Ubuntu 包名是 fcitx5-frontend-qt6，不是 fcitx5-qt6。
+          # 装的库：
+          #   libfcitx5-qt6-1   — libfcitx5-qt6widgets.so / libfcitx5-qt6dbus.so
+          #   libfcitx5utils2   — libFcitx5Utils.so
+          #   libfcitx5-qt-data — IM module 的 Qt 资源文件（不一定需要）
           sudo apt-get install -y \
-            fcitx5-qt6 libfcitx5-qt6-1 libfcitx5utils1 libfcitx5config1
+            fcitx5-frontend-qt6 libfcitx5-qt6-1 libfcitx5utils2 libfcitx5-qt-data
 
       # 设置 EXTRA_PLATFORM_PLUGINS 让 linuxdeploy-plugin-qt 打包 Qt wayland 平台插件。
       # Qt 6.5 用 libqwayland-generic.so（Qt 6.10+ 改名为 libqwayland.so）。
