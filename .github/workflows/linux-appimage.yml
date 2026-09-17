@@ -41,26 +41,21 @@ jobs:
             libxcb-cursor-dev libcups2-dev fuse \
             file
           # 提供 libwayland-client.so 等基础库，让 AppImage 内部能 link 到
+          # Qt wayland 平台插件（libqwayland-generic.so）依赖这些。
           sudo apt-get install -y \
             libwayland-client0 libwayland-cursor0 libwayland-egl1 \
             libwayland-server0 libdbus-1-3
-          # 提供 fcitx5 Qt6 平台输入法插件和运行库
-          # 不打包进 AppImage 的话，Qt 6 wayland 会 fallback 到 QWaylandInputContext，
-          # 走 wayland input-method-v3 协议，text_input_rect 报告有问题导致
-          # fcitx5 候选词 UI 跑到屏幕底部（不贴光标）。
-          # 有了这个插件，Qt 走 DBus 协议跟 fcitx5 通信，候选词位置准确。
-          # Ubuntu 包名是 fcitx5-frontend-qt6，不是 fcitx5-qt6。
-          # 装的库：
-          #   libfcitx5-qt6-1   — libfcitx5-qt6widgets.so / libfcitx5-qt6dbus.so
-          #   libfcitx5utils2   — libFcitx5Utils.so
-          #   libfcitx5-qt-data — IM module 的 Qt 资源文件（不一定需要）
-          sudo apt-get install -y \
-            fcitx5-frontend-qt6 libfcitx5-qt6-1 libfcitx5utils2 libfcitx5-qt-data
 
       # 设置 EXTRA_PLATFORM_PLUGINS 让 linuxdeploy-plugin-qt 打包 Qt wayland 平台插件。
-      # Qt 6.5 用 libqwayland-generic.so（Qt 6.10+ 改名为 libqwayland.so）。
-      # 没这个 AppImage 只能走 XWayland，跟 KDE Plasma + fcitx5 的 wayland input-method-v2
-      # 协议不兼容，中文输入法失效。
+      # Qt 6.5/6.8 用 libqwayland-generic.so（Qt 6.10+ 改名为 libqwayland.so）。
+      #
+      # 不要注入 fcitx5 platforminputcontext 插件（libfcitx5platforminputcontextplugin.so）。
+      # 那个插件让 Qt 走 DBus 而不是原生 wayland input-method-v2/v3 协议，
+      # 它的 cursorRectangleWrapper() 对 QAbstractScrollArea 派生的 widget
+      # （如 ScintillaEditBase）会算出错误的矩形，导致 fcitx5 候选词 UI
+      # 跟光标位置差一大块。
+      # 走原生 wayland 协议（QWaylandInputContext）是 KDE Plasma 下 fcitx5
+      # 中文输入的正确做法，Kate / Dolphin / Konsole 都走这条路径。
       - name: Setup Linux AppImage
         run: |
           set -eux
@@ -84,34 +79,6 @@ jobs:
 
       - name: Build
         run: cmake --build build --parallel
-
-      # 把 fcitx5 Qt6 平台输入法插件和运行库复制到 AppDir。
-      # 这样 Qt 在 AppImage 启动时能找到 libfcitx5platforminputcontextplugin.so，
-      # 优先用 DBus 协议跟 fcitx5 通信（候选词位置准确），而不是 fallback 到
-      # Qt 内置的 QWaylandInputContext（走 wayland input-method-v3，候选词位置
-      # 在 KDE Plasma 下经常跑到屏幕底部）。
-      - name: Inject fcitx5 Qt6 plugin into AppDir
-        run: |
-          set -eux
-          APPDIR=build/AppDir
-          mkdir -p "$APPDIR/usr/plugins/platforminputcontexts" "$APPDIR/usr/lib"
-          # Qt fcitx5 platforminputcontext 插件
-          cp -v /usr/lib/x86_64-linux-gnu/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so \
-             "$APPDIR/usr/plugins/platforminputcontexts/"
-          # fcitx5 运行时库（被 plugin 动态加载）。
-          # 用 find 自动发现真实版本号——Ubuntu 包名是 libfcitx5utils2 / libfcitx5core7 /
-          # libfcitx5-qt6-1，但实际 .so 文件名是 libFcitx5Utils.so.2 / libFcitx5Core.so.7 /
-          # libFcitx5Qt6WidgetsAddons.so.2 / libFcitx5Qt6DBusAddons.so.1（不是 .so.0）。
-          for pattern in 'libFcitx5Utils.so.*' 'libFcitx5Core.so.*' \
-                         'libFcitx5Qt6WidgetsAddons.so.*' 'libFcitx5Qt6DBusAddons.so.*' \
-                         'libfcitx5utils.so.*' 'libfcitx5-qt6widgets.so.*' 'libfcitx5-qt6dbus.so.*'; do
-            for f in /usr/lib/x86_64-linux-gnu/$pattern; do
-              [ -f "$f" ] || continue
-              cp -av "$f" "$APPDIR/usr/lib/"
-            done
-          done
-          ls -la "$APPDIR/usr/plugins/platforminputcontexts/"
-          ls -la "$APPDIR/usr/lib/" | grep -i fcitx || true
 
       - name: Build AppImage
         run: cmake --build build --target appimage --parallel
