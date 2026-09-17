@@ -94,7 +94,7 @@ jobs:
         run: |
           set -eux
           APPDIR=build/AppDir
-          mkdir -p "$APPDIR/usr/plugins/platforminputcontexts"
+          mkdir -p "$APPDIR/usr/plugins/platforminputcontexts" "$APPDIR/usr/lib"
           # Qt fcitx5 platforminputcontext 插件
           cp -v /usr/lib/x86_64-linux-gnu/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so \
              "$APPDIR/usr/plugins/platforminputcontexts/"
