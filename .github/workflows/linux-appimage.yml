@@ -40,6 +40,21 @@ jobs:
             libxkbcommon-dev libxkbcommon-x11-0 \
             libxcb-cursor-dev libcups2-dev fuse \
             file
+          # 提供 libwayland-client.so 等基础库，让 AppImage 内部能 link 到
+          sudo apt-get install -y \
+            libwayland-client0 libwayland-cursor0 libwayland-egl1 \
+            libwayland-server0 libdbus-1-3
+
+      # 设置 EXTRA_PLATFORM_PLUGINS 让 linuxdeploy-plugin-qt 打包 Qt wayland 平台插件。
+      # Qt 6.5 用 libqwayland-generic.so（Qt 6.10+ 改名为 libqwayland.so）。
+      # 没这个 AppImage 只能走 XWayland，跟 KDE Plasma + fcitx5 的 wayland input-method-v2
+      # 协议不兼容，中文输入法失效。
+      - name: Setup Linux AppImage
+        run: |
+          set -eux
+          echo "EXTRA_PLATFORM_PLUGINS=libqwayland-generic.so" >> "$GITHUB_ENV"
+          # EXTRA_QT_MODULES 让 linuxdeploy-plugin-qt 打包更多 Qt 模块
+          echo "EXTRA_QT_MODULES=qt5compat" >> "$GITHUB_ENV"
 
       - name: Show toolchain
         run: |
