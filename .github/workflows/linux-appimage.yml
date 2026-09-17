@@ -44,6 +44,13 @@ jobs:
           sudo apt-get install -y \
             libwayland-client0 libwayland-cursor0 libwayland-egl1 \
             libwayland-server0 libdbus-1-3
+          # 提供 fcitx5 Qt6 平台输入法插件和运行库
+          # 不打包进 AppImage 的话，Qt 6 wayland 会 fallback 到 QWaylandInputContext，
+          # 走 wayland input-method-v3 协议，text_input_rect 报告有问题导致
+          # fcitx5 候选词 UI 跑到屏幕底部（不贴光标）。
+          # 有了这个插件，Qt 走 DBus 协议跟 fcitx5 通信，候选词位置准确。
+          sudo apt-get install -y \
+            fcitx5-qt6 libfcitx5-qt6-1 libfcitx5utils1 libfcitx5config1
 
       # 设置 EXTRA_PLATFORM_PLUGINS 让 linuxdeploy-plugin-qt 打包 Qt wayland 平台插件。
       # Qt 6.5 用 libqwayland-generic.so（Qt 6.10+ 改名为 libqwayland.so）。
@@ -72,6 +79,28 @@ jobs:
 
       - name: Build
         run: cmake --build build --parallel
+
+      # 把 fcitx5 Qt6 平台输入法插件和运行库复制到 AppDir。
+      # 这样 Qt 在 AppImage 启动时能找到 libfcitx5platforminputcontextplugin.so，
+      # 优先用 DBus 协议跟 fcitx5 通信（候选词位置准确），而不是 fallback 到
+      # Qt 内置的 QWaylandInputContext（走 wayland input-method-v3，候选词位置
+      # 在 KDE Plasma 下经常跑到屏幕底部）。
+      - name: Inject fcitx5 Qt6 plugin into AppDir
+        run: |
+          set -eux
+          APPDIR=build/AppDir
+          mkdir -p "$APPDIR/usr/plugins/platforminputcontexts"
+          # Qt fcitx5 platforminputcontext 插件
+          cp -v /usr/lib/x86_64-linux-gnu/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so \
+             "$APPDIR/usr/plugins/platforminputcontexts/"
+          # fcitx5 Qt6 运行时库（被 plugin 动态加载）
+          cp -v /usr/lib/x86_64-linux-gnu/libFcitx5Utils.so.0* "$APPDIR/usr/lib/" || true
+          cp -v /usr/lib/x86_64-linux-gnu/libFcitx5Core.so.0* "$APPDIR/usr/lib/" || true
+          cp -v /usr/lib/x86_64-linux-gnu/libfcitx5utils.so.0* "$APPDIR/usr/lib/" || true
+          cp -v /usr/lib/x86_64-linux-gnu/libfcitx5-qt6widgets.so.0* "$APPDIR/usr/lib/" || true
+          cp -v /usr/lib/x86_64-linux-gnu/libfcitx5-qt6dbus.so.0* "$APPDIR/usr/lib/" || true
+          ls -la "$APPDIR/usr/plugins/platforminputcontexts/"
+          ls -la "$APPDIR/usr/lib/" | grep -i fcitx || true
 
       - name: Build AppImage
         run: cmake --build build --target appimage --parallel
