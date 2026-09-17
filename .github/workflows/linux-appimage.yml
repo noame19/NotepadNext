@@ -117,7 +117,7 @@ jobs:
       - name: Download AppImage artifact
         uses: actions/download-artifact@v8
         with:
-          name: NotepadNext-Linux-Qt6.8.3-AppImage
+          name: NotepadNext-Linux-Qt${{ env.QT_VERSION }}-AppImage
           path: dist
 
       - name: Upload to GitHub release
