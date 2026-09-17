@@ -98,12 +98,18 @@ jobs:
           # Qt fcitx5 platforminputcontext 插件
           cp -v /usr/lib/x86_64-linux-gnu/qt6/plugins/platforminputcontexts/libfcitx5platforminputcontextplugin.so \
              "$APPDIR/usr/plugins/platforminputcontexts/"
-          # fcitx5 Qt6 运行时库（被 plugin 动态加载）
-          cp -v /usr/lib/x86_64-linux-gnu/libFcitx5Utils.so.0* "$APPDIR/usr/lib/" || true
-          cp -v /usr/lib/x86_64-linux-gnu/libFcitx5Core.so.0* "$APPDIR/usr/lib/" || true
-          cp -v /usr/lib/x86_64-linux-gnu/libfcitx5utils.so.0* "$APPDIR/usr/lib/" || true
-          cp -v /usr/lib/x86_64-linux-gnu/libfcitx5-qt6widgets.so.0* "$APPDIR/usr/lib/" || true
-          cp -v /usr/lib/x86_64-linux-gnu/libfcitx5-qt6dbus.so.0* "$APPDIR/usr/lib/" || true
+          # fcitx5 运行时库（被 plugin 动态加载）。
+          # 用 find 自动发现真实版本号——Ubuntu 包名是 libfcitx5utils2 / libfcitx5core7 /
+          # libfcitx5-qt6-1，但实际 .so 文件名是 libFcitx5Utils.so.2 / libFcitx5Core.so.7 /
+          # libFcitx5Qt6WidgetsAddons.so.2 / libFcitx5Qt6DBusAddons.so.1（不是 .so.0）。
+          for pattern in 'libFcitx5Utils.so.*' 'libFcitx5Core.so.*' \
+                         'libFcitx5Qt6WidgetsAddons.so.*' 'libFcitx5Qt6DBusAddons.so.*' \
+                         'libfcitx5utils.so.*' 'libfcitx5-qt6widgets.so.*' 'libfcitx5-qt6dbus.so.*'; do
+            for f in /usr/lib/x86_64-linux-gnu/$pattern; do
+              [ -f "$f" ] || continue
+              cp -av "$f" "$APPDIR/usr/lib/"
+            done
+          done
           ls -la "$APPDIR/usr/plugins/platforminputcontexts/"
           ls -la "$APPDIR/usr/lib/" | grep -i fcitx || true
 
